@@ -1,7 +1,7 @@
 
 Question
 Dealer n
-Auction ppp1np3npp
+Auction ppp1n2c3npp
 Hand
  K Q 5 2
  8 4 2

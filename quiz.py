@@ -12,6 +12,8 @@ def main() -> None:
             qu = read_question(f)
             if not qu:
                 break
+            # print('debug:')
+            # print(qu)
             ask_question(qu)
 
 

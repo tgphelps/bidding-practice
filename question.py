@@ -29,11 +29,19 @@ class Hand:
                 break
             self.expl.append(line)
 
+    def __str__(self) -> str:
+        s = ''
+        for suit in self.suits:
+            s += suit
+            s += '\n'
+        s += 'Answer: ' + self.answer
+        return s
+
 
 class Question:
     f: TextIO
     dealer: str
-    auction: str
+    auction: list[str]
     hands: list[Hand]
 
     def __init__(self, f: TextIO):
@@ -41,7 +49,7 @@ class Question:
         self.hands = []
         while True:
             line = get_line(f)
-            print('LINE:', line)
+            # print('LINE:', line)
             if line == 'Endq':
                 break
             if line.startswith('Dealer'):
@@ -61,7 +69,14 @@ class Question:
 
     def store_auction(self, line) -> None:
         fld = line.split()
-        self.auction = fld[1]
+        self.auction = decode_auction(fld[1])
+
+    def __str__(self) -> str:
+        s = f'dealer: {self.dealer}\nauction: {self.auction}\n'
+        for hand in self.hands:
+            s += hand.__str__()
+            s += '\n'
+        return s
 
 
 def get_line(f: TextIO) -> str:
@@ -73,3 +88,31 @@ def get_line(f: TextIO) -> str:
         line = line.rstrip()
         if line != '':
             return line
+
+
+def decode_auction(raw: str) -> list[str]:
+    bids: list[str] = []
+    i = 0
+    while i < len(raw):
+        c = raw[i]
+        i += 1
+        if c == 'p':
+            bids.append('Pass')
+        elif c == 'x':
+            bids.append('Dbl')
+        elif c == 'r':
+            bids.append('Rdbl')
+        elif c in '1234567':
+            c2 = raw[i]
+            i += 1
+            if c2 in 'shdc':
+                bids.append(c + c2.upper())
+            elif c2 == 'n':
+                bids.append(c + 'NT')
+            else:
+                print('BAD auction:', raw)
+                assert False
+        else:
+            print('BAD auction:', raw)
+            assert False
+    return bids

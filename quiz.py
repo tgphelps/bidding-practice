@@ -27,7 +27,37 @@ def read_question(f: TextIO) -> Optional[question.Question]:
 
 
 def ask_question(qu: question.Question) -> None:
-    print('question...')
+    show_auction(qu)
+    for hand in qu.hands:
+        show_hand(hand)
+        ans = get_user_bid()
+        if ans == hand.answer:
+            print('Correct')
+        else:
+            print('No')
+            print_explanation(hand.expl)
+        ans = input('Continue? ')
+        if ans == 'n':
+            print('Exiting.')
+            sys.exit(0)
+
+
+def show_auction(qu: question.Question) -> None:
+    print(f'Dealer: {qu.dealer}')
+    print(qu.auction)
+
+
+def show_hand(hand: question.Hand) -> None:
+    hand.print()
+
+
+def get_user_bid() -> str:
+    ans = input('Your bid? ')
+    return ans
+
+
+def print_explanation(expl: list[str]) -> None:
+    pass
 
 
 if __name__ == '__main__':

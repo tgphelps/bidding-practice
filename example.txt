@@ -3,9 +3,9 @@ Question
 Dealer n
 Auction ppp1n2c3npp
 Hand
- K Q 5 2
+ K Q 10 2
  8 4 2
- A J 9 3 2
+ A J 9  3 2
  -
 Answer p
 Explanation

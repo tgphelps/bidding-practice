@@ -2,6 +2,9 @@
 from typing import TextIO
 
 
+SUIT_SYMS = "\u2660\u2665\u2666\u2663"
+
+
 class Hand:
     suits: list[str]
     answer: str
@@ -36,6 +39,14 @@ class Hand:
             s += '\n'
         s += 'Answer: ' + self.answer
         return s
+
+    def print(self) -> None:
+        print('\nYour hand:')
+        for i, suit in enumerate(self.suits):
+            cs = suit.split()
+            a = [x.ljust(2) for x in cs]
+            s = ' '.join(a)
+            print(SUIT_SYMS[i], s)
 
 
 class Question:

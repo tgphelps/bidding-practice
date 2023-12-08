@@ -19,6 +19,7 @@ def main() -> None:
 
 def read_question(f: TextIO) -> Optional[question.Question]:
     line = question.get_line(f)
+    # print('Reading question...')
     if line == 'Question':
         return question.Question(f)
     else:

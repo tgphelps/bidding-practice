@@ -3,42 +3,68 @@ from typing import TextIO
 
 
 SUIT_SYMS = "\u2660\u2665\u2666\u2663"
-BID_PADDING = {'N': 0, 'E': 1, 'S':2, 'W':3}
+BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
 
 
-class Hand:
-    suits: list[str]
+class Step:
+    auction: str
     answer: str
     expl: list[str]
 
     def __init__(self, f: TextIO):
-        self.suits = []
         self.expl = []
+        while True:
+            line = get_line(f)
+            if line.startswith('Auction'):
+                fld = line.split()
+                if len(fld) > 1:
+                    self.auction = fld[1]
+                else:
+                    self.auction = ''
+            elif line.startswith('Answer'):
+                fld = line.split()
+                self.answer = fld[1]
+            elif line.startswith('Explanation'):
+                last_line = self.store_explanation(f)
+                assert last_line.startswith('Ends')
+                # print('end step')
+                break
+
+    def store_explanation(self, f: TextIO) -> str:
+        while True:
+            line = get_line(f)
+            if line.startswith(' '):
+                self.expl.append(line)
+            else:
+                return line
+
+
+class Hand:
+    suits: list[str]
+
+    def __init__(self, f: TextIO):
+        self.suits = []
         for i in range(4):
             line = get_line(f)
             assert line[0] == ' '
             self.suits.append(line)
         line = get_line(f)
-        assert line.startswith('Answer')
-        fld = line.split()
-        self.answer = fld[1]
-        line = get_line(f)
-        assert line.startswith('Explanation')
-        self.store_explanation(f)
+        assert line.startswith('Endh')
+        # print('end hand')
 
-    def store_explanation(self, f: TextIO) -> None:
-        while True:
-            line = get_line(f)
-            if line == 'Endh':
-                break
-            self.expl.append(line)
+    # def store_explanation(self, f: TextIO) -> None:
+    #     while True:
+    #         line = get_line(f)
+    #         if line == 'Endh':
+    #             break
+    #         self.expl.append(line)
 
     def __str__(self) -> str:
         s = ''
         for suit in self.suits:
             s += suit
             s += '\n'
-        s += 'Answer: ' + self.answer
+        # s += 'Answer: ' + self.answer
         return s
 
     def print(self) -> None:
@@ -53,25 +79,29 @@ class Hand:
 class Question:
     f: TextIO
     dealer: str
-    auction: list[str]
-    hands: list[Hand]
+    hand: Hand
+    auction: str
+    steps: list[Step]
 
     def __init__(self, f: TextIO):
         self.f = f
-        self.hands = []
+        self.steps = []
+        self.auction = ''  # Will be built as steps are shown
         while True:
             line = get_line(f)
             # print('LINE:', line)
             if line == 'Endq':
+                # print('end question')
                 break
             if line.startswith('Dealer'):
                 self.store_dealer(line)
-            elif line.startswith('Auction'):
-                self.store_auction(line)
             elif line.startswith('Hand'):
-                self.hands.append(Hand(f))
+                self.hand = Hand(f)
+            elif line.startswith('Step'):
+                self.steps.append(Step(f))
             else:
                 print('Unknown:', line)
+                assert False
 
     def store_dealer(self, line) -> None:
         fld = line.split()
@@ -79,16 +109,16 @@ class Question:
         assert dealer in ('n', 's', 'e', 'w')
         self.dealer = dealer.upper()
 
-    def store_auction(self, line) -> None:
-        fld = line.split()
-        self.auction = decode_auction(fld[1], self.dealer)
+    # def store_auction(self, line) -> None:
+    #     fld = line.split()
+    #     self.auction = decode_auction(fld[1], self.dealer)
 
-    def __str__(self) -> str:
-        s = f'dealer: {self.dealer}\nauction: {self.auction}\n'
-        for hand in self.hands:
-            s += hand.__str__()
-            s += '\n'
-        return s
+    # def __str__(self) -> str:
+    #     s = f'dealer: {self.dealer}\nauction: {self.auction}\n'
+    #     for hand in self.hands:
+    #         s += hand.__str__()
+    #         s += '\n'
+    #     return s
 
 
 def get_line(f: TextIO) -> str:
@@ -99,6 +129,7 @@ def get_line(f: TextIO) -> str:
             assert False
         line = line.rstrip()
         if line != '':
+            # print('debug:', line)
             return line
 
 

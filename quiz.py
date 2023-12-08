@@ -43,8 +43,15 @@ def ask_question(qu: question.Question) -> None:
 
 
 def show_auction(qu: question.Question) -> None:
-    print(f'Dealer: {qu.dealer}')
-    print(qu.auction)
+    print(f'\nDealer: {qu.dealer}\n')
+    print('North   East  South   West')
+    print('------ ------ ------ ------')
+    auc = qu.auction
+    i = 0
+    while i < len(auc):
+        bids = [x.ljust(6) for x in auc[i:i+4]]
+        print(' '.join(bids))
+        i += 4
 
 
 def show_hand(hand: question.Hand) -> None:
@@ -57,7 +64,8 @@ def get_user_bid() -> str:
 
 
 def print_explanation(expl: list[str]) -> None:
-    pass
+    for line in expl:
+        print(line)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from typing import TextIO
 
 
 SUIT_SYMS = "\u2660\u2665\u2666\u2663"
+BID_PADDING = {'N': 0, 'E': 1, 'S':2, 'W':3}
 
 
 class Hand:
@@ -80,7 +81,7 @@ class Question:
 
     def store_auction(self, line) -> None:
         fld = line.split()
-        self.auction = decode_auction(fld[1])
+        self.auction = decode_auction(fld[1], self.dealer)
 
     def __str__(self) -> str:
         s = f'dealer: {self.dealer}\nauction: {self.auction}\n'
@@ -101,7 +102,7 @@ def get_line(f: TextIO) -> str:
             return line
 
 
-def decode_auction(raw: str) -> list[str]:
+def decode_auction(raw: str, dealer: str) -> list[str]:
     bids: list[str] = []
     i = 0
     while i < len(raw):
@@ -126,4 +127,10 @@ def decode_auction(raw: str) -> list[str]:
         else:
             print('BAD auction:', raw)
             assert False
+    # Normalize auction, so North's bids are on the left.
+    bids.append('?')
+    if dealer != 'n':
+        count = BID_PADDING[dealer]
+        for i in range(count):
+            bids.insert(0, '-')
     return bids

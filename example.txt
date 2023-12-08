@@ -1,27 +1,42 @@
 
 Question
-Dealer n
-Auction ppp1n2c3npp
+Dealer s
 Hand
  K Q 10 2
- 8 4 2
- A J 9  3 2
- -
-Answer p
-Explanation
- text goes here
+ A 4 2
+ A J 9 3
+ Q 6
 Endh
 
+Step
+Auction
+Answer 1n
+Explanation
+ 15-17 points and a balanced hand.
+Ends
+
+Step
+Auction p2cp
+Answer 2s
+Explanation
+ 2c is Stayman, asking for a major suit. You have one.
+Ends
+
+
+Question
+Dealer s
 Hand
- K Q 5 2
- 8 4 2
- A J 9 3 2
- -
-Answer 4d
-Explanation
- text goes here
+ K Q 10 2
+ A 4 2
+ A J 9 3
+ Q 6
 Endh
-Endq
 
+Step
+Auction
+Answer 1n
+Explanation
+ 15-17 points and a balanced hand.
+Ends
 
 End

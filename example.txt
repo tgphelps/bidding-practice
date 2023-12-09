@@ -1,5 +1,6 @@
 
 Question
+Vulnerable none
 Dealer s
 Hand
  K Q 10 2
@@ -9,7 +10,7 @@ Hand
 Endh
 
 Step
-Auction -
+Auction
 Answer 1n
 Explanation
  15-17 points and a balanced hand.
@@ -24,6 +25,7 @@ Ends
 Endq
 
 Question
+Vulnerable n-s
 Dealer s
 Hand
  K Q 10 2

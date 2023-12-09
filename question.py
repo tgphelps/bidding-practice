@@ -7,20 +7,19 @@ BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
 
 
 class Step:
-    auction: str
+    auction: list[str]
     answer: str
     expl: list[str]
 
-    def __init__(self, f: TextIO):
+    def __init__(self, f: TextIO, dealer: str):
+        self.auction = []
         self.expl = []
         while True:
             line = get_line(f)
             if line.startswith('Auction'):
                 fld = line.split()
                 if len(fld) > 1:
-                    self.auction = fld[1]
-                else:
-                    self.auction = ''
+                    self.auction += decode_auction(fld[1], dealer)
             elif line.startswith('Answer'):
                 fld = line.split()
                 self.answer = fld[1]
@@ -78,6 +77,7 @@ class Hand:
 
 class Question:
     f: TextIO
+    vulnerable: str
     dealer: str
     hand: Hand
     auction: str
@@ -98,7 +98,10 @@ class Question:
             elif line.startswith('Hand'):
                 self.hand = Hand(f)
             elif line.startswith('Step'):
-                self.steps.append(Step(f))
+                self.steps.append(Step(f, self.dealer))
+            elif line.startswith('Vulnerable'):
+                fld = line.split()
+                self.vulnerable = fld[1].upper()
             else:
                 print('Unknown:', line)
                 assert False
@@ -159,9 +162,9 @@ def decode_auction(raw: str, dealer: str) -> list[str]:
             print('BAD auction:', raw)
             assert False
     # Normalize auction, so North's bids are on the left.
-    bids.append('?')
-    if dealer != 'n':
-        count = BID_PADDING[dealer]
-        for i in range(count):
-            bids.insert(0, '-')
+    # bids.append('?')
+    # if dealer != 'n':
+    #     count = BID_PADDING[dealer]
+    #     for i in range(count):
+    #         bids.insert(0, '-')
     return bids

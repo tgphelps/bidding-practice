@@ -29,22 +29,25 @@ def read_question(f: TextIO) -> Optional[question.Question]:
 
 def ask_question(qu: question.Question) -> None:
     show_auction(qu)
-    for hand in qu.hands:
-        show_hand(hand)
-        ans = get_user_bid()
-        if ans == hand.answer:
-            print('Correct')
-        else:
-            print('No')
-            print_explanation(hand.expl)
-        ans = input('Continue? ')
-        if ans == 'n':
-            print('Exiting.')
-            sys.exit(0)
+    for step in qu.steps:
+        print('step...')
+    # for hand in qu.hands:
+    #     show_hand(hand)
+    #     ans = get_user_bid()
+    #     if ans == hand.answer:
+    #         print('Correct')
+    #     else:
+    #         print('No')
+    #         print_explanation(hand.expl)
+    #     ans = input('Continue? ')
+    #     if ans == 'n':
+    #         print('Exiting.')
+    #         sys.exit(0)
 
 
 def show_auction(qu: question.Question) -> None:
-    print(f'\nDealer: {qu.dealer}\n')
+    print('\nVulnerability:', qu.vulnerable)
+    print(f'Dealer: {qu.dealer}\n')
     print('North   East  South   West')
     print('------ ------ ------ ------')
     auc = qu.auction

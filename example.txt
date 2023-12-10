@@ -11,13 +11,13 @@ Endh
 
 Step
 Auction
-Answer 1n
+Answer 1nt
 Explanation
  15-17 points and a balanced hand.
 Ends
 
 Step
-Auction p2cp
+Auction 1np2cp
 Answer 2s
 Explanation
  2c is Stayman, asking for a major suit. You have one.
@@ -36,7 +36,7 @@ Endh
 
 Step
 Auction
-Answer 1n
+Answer 1nt
 Explanation
  15-17 points and a balanced hand.
 Ends

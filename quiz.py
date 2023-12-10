@@ -23,26 +23,61 @@ def read_question(f: TextIO) -> Optional[question.Question]:
     if line == 'Question':
         return question.Question(f)
     else:
-        assert line == 'End'
+        if line != 'End':
+            print('line:', line)
+            assert False
         return None
 
 
 def ask_question(qu: question.Question) -> None:
-    show_auction(qu)
+    # pseudo code:
+    # normalize the auction
+    # for each step:
+    #     append step auction to question auction
+    #     show auction
+    #     get user bid
+    #     tell answer
+    #     show explanation
+    #     if he wants to stop:
+    #         break
+    normalize_auction(qu)
     for step in qu.steps:
         print('step...')
-    # for hand in qu.hands:
-    #     show_hand(hand)
-    #     ans = get_user_bid()
-    #     if ans == hand.answer:
-    #         print('Correct')
-    #     else:
-    #         print('No')
-    #         print_explanation(hand.expl)
-    #     ans = input('Continue? ')
-    #     if ans == 'n':
-    #         print('Exiting.')
-    #         sys.exit(0)
+        update_auction(qu, step)
+        show_auction(qu)
+        show_hand(qu.hand)
+        ans = get_user_bid()
+        if ans == step.answer:
+            print('Correct')
+        else:
+            print('No')
+            print_explanation(step.expl)
+        ans = input('Continue? ')
+        if ans == 'n':
+            print('Exiting.')
+            sys.exit(0)
+        # Going to next step
+        qu.auction.remove('?')
+        # qu.auction.append(step.answer)
+
+
+BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+
+
+def normalize_auction(qu: question.Question) -> None:
+    # Normalize auction, so North's bids are on the left.
+    bids = qu.auction
+    # bids.append('?')
+    if qu.dealer != 'n':
+        count = BID_PADDING[qu.dealer]
+        for i in range(count):
+            bids.insert(0, '-')
+
+
+def update_auction(qu: question.Question, step: question.Step) -> None:
+    for bid in step.auction:
+        qu.auction.append(bid)
+    qu.auction.append('?')
 
 
 def show_auction(qu: question.Question) -> None:

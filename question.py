@@ -80,13 +80,13 @@ class Question:
     vulnerable: str
     dealer: str
     hand: Hand
-    auction: str
+    auction: list[str]
     steps: list[Step]
 
     def __init__(self, f: TextIO):
         self.f = f
         self.steps = []
-        self.auction = ''  # Will be built as steps are shown
+        self.auction = []  # Will be built as steps are shown
         while True:
             line = get_line(f)
             # print('LINE:', line)

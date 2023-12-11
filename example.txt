@@ -3,24 +3,24 @@ Question
 Vulnerable none
 Dealer s
 Hand
- K Q 10 2
- A 4 2
- A J 9 3
- Q 6
+ A K 10 x x
+ A 4 3
+ A J 9
+ Q x
 Endh
 
 Step
 Auction
 Answer 1nt
 Explanation
- 15-17 points and a balanced hand.
+ Ignore the 5-card major. 15-17 points and a balanced hand.
 Ends
 
 Step
 Auction 1np2cp
 Answer 2s
 Explanation
- 2c is Stayman, asking for a major suit. You have one.
+ 2c is Stayman, asking for a major suit. Bid yours.
 Ends
 Endq
 
@@ -28,10 +28,10 @@ Question
 Vulnerable n-s
 Dealer s
 Hand
- K Q 10 2
- A 4 2
- A J 9 3
- Q 6
+ K Q 10 x
+ A x x
+ A J x x
+ Q x
 Endh
 
 Step

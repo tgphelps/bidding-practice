@@ -30,37 +30,28 @@ def read_question(f: TextIO) -> Optional[question.Question]:
 
 
 def ask_question(qu: question.Question) -> None:
-    # pseudo code:
-    # normalize the auction
-    # for each step:
-    #     append step auction to question auction
-    #     show auction
-    #     get user bid
-    #     tell answer
-    #     show explanation
-    #     if he wants to stop:
-    #         break
     normalize_auction(qu)
     for step in qu.steps:
         print('step...')
         update_auction(qu, step)
         show_auction(qu)
-        show_hand(qu.hand)
+        qu.hand.print()
+        print()
         ans = get_user_bid()
         if ans == step.answer:
             print('Correct')
         else:
             print('No')
             print_explanation(step.expl)
-        ans = input('Continue? ')
+        ans = input("Continue? ('n' to quit) ")
         if ans == 'n':
             print('Exiting.')
             sys.exit(0)
         # Going to next step
         qu.auction.remove('?')
-        # qu.auction.append(step.answer)
 
 
+# This tells how far to shift the auction so North's bids are on the left.
 BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
 
 
@@ -81,6 +72,9 @@ def update_auction(qu: question.Question, step: question.Step) -> None:
 
 
 def show_auction(qu: question.Question) -> None:
+    for i in range(15):
+        print()
+    print('-----------------------------')
     print('\nVulnerability:', qu.vulnerable)
     print(f'Dealer: {qu.dealer}\n')
     print('North   East  South   West')
@@ -91,10 +85,7 @@ def show_auction(qu: question.Question) -> None:
         bids = [x.ljust(6) for x in auc[i:i+4]]
         print(' '.join(bids))
         i += 4
-
-
-def show_hand(hand: question.Hand) -> None:
-    hand.print()
+    print('-----------------------------')
 
 
 def get_user_bid() -> str:

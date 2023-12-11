@@ -1,4 +1,6 @@
 
+import random
+from collections import Counter
 from typing import TextIO
 
 
@@ -46,17 +48,11 @@ class Hand:
         for i in range(4):
             line = get_line(f)
             assert line[0] == ' '
+            line = replace_xs(line)
             self.suits.append(line)
         line = get_line(f)
         assert line.startswith('Endh')
         # print('end hand')
-
-    # def store_explanation(self, f: TextIO) -> None:
-    #     while True:
-    #         line = get_line(f)
-    #         if line == 'Endh':
-    #             break
-    #         self.expl.append(line)
 
     def __str__(self) -> str:
         s = ''
@@ -168,3 +164,21 @@ def decode_auction(raw: str, dealer: str) -> list[str]:
     #     for i in range(count):
     #         bids.insert(0, '-')
     return bids
+
+
+def replace_xs(suit: str) -> str:
+    cards = ['2', '3', '4', '5', '6', '7', '8', '9']
+    random.shuffle(cards)
+    d = dict(Counter(suit))
+    if 'x' not in d:
+        return suit
+    n = d['x']
+    cards = cards[0:n]
+    cards.sort()
+    new = ''
+    for c in suit:
+        if c != 'x':
+            new += c
+        else:
+            new += cards.pop()
+    return new

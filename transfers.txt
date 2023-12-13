@@ -93,29 +93,72 @@ Ends
 
 Step
 Auction 2hp2sp
-Answer 3h
+Answer 3s
 Explanation
- With 9 points, invite opener to bid game.
+ With 9 points and 6 spades, invite opener to bid 4S.
+Ends
+
+Endq
+
+# Invitational to 3nt
+Question
+Vulnerable none
+Dealer n
+Hand
+ A J 10 x x
+ Q x x
+ x x x x
+ x
+Endh
+
+Step
+Auction 1np
+Answer 2h
+Explanation
+ You have a 5-card major. Transfer.
+Ends
+
+Step
+Auction 2hp2sp
+Answer 2nt
+Explanation
+ With 8 points and 5 spades, invite opener to bid game somewhere.
 Ends
 
 Endq
 
 # Game in NT overridden
 Question
+Keywords overridden
 Vulnerable none
-Dealer -
+Dealer n
 Hand
- -
- -
- -
- -
+ K Q x x x
+ x x
+ x x
+ A J 10 x
 Endh
 
 Step
-Auction
-Answer -
+Auction 1np
+Answer 2h
 Explanation
- expl
+ Transfer to spades.
+Ends
+
+Step
+Auction 2hp2sp
+Answer 3nt
+Explanation
+ You want to play game, but don't know where.
+ Bid 3NT and partner correct to 4S if he wants.
+Ends
+
+Step
+Auction 3np4sp
+Answer p
+Explanation
+ Partner has 3 spades, so we have a fit and game.
 Ends
 
 Endq
@@ -123,19 +166,34 @@ Endq
 # Game in NT accepted
 Question
 Vulnerable none
-Dealer -
+Dealer n
 Hand
- -
- -
- -
- -
+ x
+ A K 10 x x
+ K J x x
+ x x x
 Endh
 
 Step
-Auction
-Answer -
+Auction 1np
+Answer 2d
 Explanation
- expl
+ Transfer to hearts.
+Ends
+
+Step
+Auction 2dp2hp
+Answer 3nt
+Explanation
+ You have enough to force game. Partner will decide 3NT or 4S.
+Ends
+
+Step
+Auction 3nppp
+Answer 2d
+Explanation
+ Transfer to hearts.
 Ends
 
 Endq
+End

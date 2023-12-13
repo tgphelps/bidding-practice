@@ -1,19 +1,42 @@
+#!/usr/bin/env python3
+
+"""
+quiz.py: Display questions and check answers
+
+Usage:
+    quiz.py [-k <key>] QUESTIONS
+    quiz.py   --version
+    quiz.py   --help
+
+Options and commands:
+    --version          Show version and exit.
+    -h --help          Show this message and exit.
+    -k <key>           Show only questions with this keyword.
+"""
+
 
 import sys
+import docopt  # type: ignore
 from typing import TextIO, Optional
 import question
 
 
 def main() -> None:
-    assert len(sys.argv) == 2
-    with open(sys.argv[1]) as f:
+    keyword = ''
+    args = docopt.docopt(__doc__, version='0.01')
+    # print(args)
+    fname = args['QUESTIONS']
+    if args['-k']:
+        keyword = args['-k']
+    with open(fname) as f:
         print()
         while True:
             qu = read_question(f)
             if not qu:
                 break
-            # print('debug:')
-            # print(qu)
+            if keyword != '':
+                if keyword not in qu.keywords:
+                    continue
             ask_question(qu)
 
 

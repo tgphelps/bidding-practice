@@ -73,6 +73,7 @@ class Hand:
 
 class Question:
     f: TextIO
+    keywords: str
     vulnerable: str
     dealer: str
     hand: Hand
@@ -81,6 +82,7 @@ class Question:
 
     def __init__(self, f: TextIO):
         self.f = f
+        self.keywords = ''
         self.steps = []
         self.auction = []  # Will be built as steps are shown
         while True:
@@ -98,6 +100,9 @@ class Question:
             elif line.startswith('Vulnerable'):
                 fld = line.split()
                 self.vulnerable = fld[1].upper()
+            elif line.startswith('Keywords'):
+                fld = line.split()
+                self.keywords = fld[1]
             else:
                 print('Unknown:', line)
                 assert False

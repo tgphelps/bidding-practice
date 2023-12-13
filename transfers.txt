@@ -1,0 +1,141 @@
+
+# Weak balanced hand
+Question
+Vulnerable none
+Dealer n
+Hand
+ q x x x
+ x x x
+ k x x x
+ x x
+Endh
+
+Step
+Auction 1np
+Answer p
+Explanation
+ Pass and hope that he doesn't go down too many.
+Ends
+
+Endq
+
+# Weak unbalanced hand
+Question
+Vulnerable none
+Dealer n
+Hand
+ q x x x x
+ x x
+ k x x x
+ x x
+Endh
+
+Step
+Auction 1np
+Answer 2h
+Explanation
+ You have a weak hand that will play better in 2S than 1NT.
+Ends
+
+Step
+Auction 2hp2sp
+Answer p
+Explanation
+ Pass and hope he makes 2S.
+Ends
+
+Endq
+
+# Game in hearts
+Question
+Vulnerable none
+Dealer n
+Hand
+ x
+ A Q 10 x x x
+ A J x
+ x x x
+Endh
+
+Step
+Auction 1np
+Answer 2d
+Explanation
+ You definitely want to play a heart contract. Transfer.
+Ends
+
+Step
+Auction 2dp2hp
+Answer 4h
+Explanation
+ You have a fit and enough for game. Bid it.
+Ends
+
+Endq
+
+# Invitational to 4h
+Question
+Vulnerable none
+Dealer n
+Hand
+ A J 10 x x x
+ Q x x
+ x x x
+ x
+Endh
+
+Step
+Auction 1np
+Answer 2h
+Explanation
+ You definitely want to play in spades. Transfer.
+Ends
+
+Step
+Auction 2hp2sp
+Answer 3h
+Explanation
+ With 9 points, invite opener to bid game.
+Ends
+
+Endq
+
+# Game in NT overridden
+Question
+Vulnerable none
+Dealer -
+Hand
+ -
+ -
+ -
+ -
+Endh
+
+Step
+Auction
+Answer -
+Explanation
+ expl
+Ends
+
+Endq
+
+# Game in NT accepted
+Question
+Vulnerable none
+Dealer -
+Hand
+ -
+ -
+ -
+ -
+Endh
+
+Step
+Auction
+Answer -
+Explanation
+ expl
+Ends
+
+Endq

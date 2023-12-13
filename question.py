@@ -126,6 +126,8 @@ def get_line(f: TextIO) -> str:
         if line == '':
             print('Unexpected EOF.')
             assert False
+        if line.startswith('#'):
+            continue
         line = line.rstrip()
         if line != '':
             # print('debug:', line)
@@ -167,6 +169,7 @@ def decode_auction(raw: str, dealer: str) -> list[str]:
 
 
 def replace_xs(suit: str) -> str:
+    "Replace, e.g., 'A K x x x' with random low cards: 'A K 9 5 3'"
     cards = ['2', '3', '4', '5', '6', '7', '8', '9']
     random.shuffle(cards)
     d = dict(Counter(suit))
@@ -178,7 +181,7 @@ def replace_xs(suit: str) -> str:
     new = ''
     for c in suit:
         if c != 'x':
-            new += c
+            new += c.upper()
         else:
             new += cards.pop()
     return new

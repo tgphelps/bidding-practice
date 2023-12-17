@@ -1,6 +1,7 @@
 
 # Weak balanced hand
 Question
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand
@@ -21,6 +22,7 @@ Endq
 
 # Weak unbalanced hand
 Question
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand
@@ -48,6 +50,7 @@ Endq
 
 # Game in hearts
 Question
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand
@@ -75,6 +78,7 @@ Endq
 
 # Invitational to 4h
 Question
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand
@@ -102,6 +106,7 @@ Endq
 
 # Invitational to 3nt
 Question
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand
@@ -129,7 +134,7 @@ Endq
 
 # Game in NT overridden
 Question
-Keywords overridden
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand
@@ -165,6 +170,7 @@ Endq
 
 # Game in NT accepted
 Question
+Keywords transfer
 Vulnerable none
 Dealer n
 Hand

@@ -1,5 +1,6 @@
 
 import random
+import sys
 from collections import Counter
 from typing import TextIO
 
@@ -10,9 +11,9 @@ SUIT_SYMS = "\u2660\u2665\u2666\u2663"
 
 class Answer:
     bid: str
-    expl: str
+    expl: list[str]
 
-    def __init__(self, bid: str, expl: str):
+    def __init__(self, bid: str, expl: list[str]):
         self.bid = bid
         self.expl = expl
 
@@ -46,6 +47,7 @@ class Hand:
 
 
 class Exercise:
+    valid: bool
     keys: list[str]
     info: list[str]
     dealer: str
@@ -54,19 +56,104 @@ class Exercise:
     auction: list[str]
     answers: list[Answer]
 
+    def __init__(self, f: TextIO):
+        self.valid = True
+        self.keys = []
+        self.info = []
+        self.auction = []
+        self.answers = []
+        while True:
+            line = get_line(f, allow_eof=True)
+            if line == ')EOF(':
+                self.valid = False
+                return
+            if line.startswith('---'):
+                break
+        # Keys, Dealer, Vulnerable, Info, Hand, Auction, Answers
+        while True:
+            line = get_line(f)
+            # if line.startswith('==='):
+            #     break
+            line = line.rstrip()
+            print('line:', line)
+            if line.startswith('Keys:'):
+                fld = line.split()
+                self.keys = fld[1:]
+            elif line.startswith('Dealer'):
+                fld = line.split()
+                d = fld[1].upper()
+                assert d in ('N', 'S', 'E', 'W')
+                self.dealer = d
+            elif line.startswith('Vulnerable:'):
+                fld = line.split()
+                v = fld[1].upper()
+                assert v in ('N-S', 'E-W', 'BOTH', 'NONE')
+                self.vulnerable = v
+            elif line.startswith('Info:'):
+                self.store_info(f)
+            elif line.startswith('Hand:'):
+                h = Hand(f)
+                self.hand = h
+                line = get_line(f)
+                line = line.rstrip()
+                assert line == ''
+            elif line.startswith('Auction:'):
+                self.store_auction(f)
+            elif line.startswith('Answers:'):
+                self.store_answers(f)
+                break
+            else:
+                print('Invalid line:', line)
+                sys.exit(1)
 
-def get_line(f: TextIO) -> str:
+    def store_info(self, f: TextIO) -> None:
+        # print('store info...')
+        while True:
+            line = get_line(f)
+            line = line.rstrip()
+            print(f'line: /{line}/')
+            if line == '':
+                break
+            self.info.append(line)
+
+    def store_auction(self, f: TextIO) -> None:
+        line = get_line(f)
+        assert 'N' in line
+        line = get_line(f)
+        assert line.startswith('---')
+        while True:
+            line = get_line(f)
+            line = line.rstrip()
+            if line == '':
+                break
+            fld = line.split()
+            for bid in fld:
+                self.auction.append(bid)
+
+    def store_answers(self, f: TextIO) -> None:
+        while True:
+            line = get_line(f)
+            if line.startswith('==='):
+                break
+            fld = line.split()
+            bid = fld[1]
+            expl = read_paragraph(f)
+            self.answers.append(Answer(bid, expl))
+
+
+def get_line(f: TextIO, allow_eof=False) -> str:
     while True:
         line = f.readline()
         if line == '':
-            print('Unexpected EOF.')
-            assert False
+            if allow_eof:
+                return ')EOF('
+            else:
+                print('Unexpected EOF.')
+                assert False
         if line.startswith('#'):
             continue
         line = line.rstrip()
-        if line != '':
-            # print('debug:', line)
-            return line
+        return line
 
 
 def decode_auction(raw: str, dealer: str) -> list[str]:
@@ -122,7 +209,37 @@ def replace_xs(suit: str) -> str:
     return new
 
 
-def run_test() -> None:
+def read_paragraph(f: TextIO) -> list[str]:
+    para: list[str] = []
+    while True:
+        line = get_line(f)
+        line = line.rstrip()
+        if line == '':
+            return para
+        para.append(line)
+
+
+# -------------------------
+
+def run_test1():
+    with open('test2.txt') as f:
+        while True:
+            print('READ...')
+            e = Exercise(f)
+            if not e.valid:
+                break
+            print('Dealer:', e.dealer)
+            print('Vuln.:', e.vulnerable)
+            print('Keys:', e.keys)
+            print('Hand:')
+            print(e.hand)
+            print('Auction:', e.auction)
+            print('Answers:')
+            print(e.answers)
+        print('DONE')
+
+
+def run_test_hand() -> None:
     with open('test.txt') as f:
         while True:
             line = get_line(f)
@@ -133,4 +250,5 @@ def run_test() -> None:
 
 
 if __name__ == '__main__':
-    run_test()
+    run_test1()
+    # run_test_hand()

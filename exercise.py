@@ -75,7 +75,7 @@ class Exercise:
             # if line.startswith('==='):
             #     break
             line = line.rstrip()
-            print('line:', line)
+            # print('line:', line)
             if line.startswith('Keys:'):
                 fld = line.split()
                 self.keys = fld[1:]
@@ -111,7 +111,7 @@ class Exercise:
         while True:
             line = get_line(f)
             line = line.rstrip()
-            print(f'line: /{line}/')
+            # print(f'line: /{line}/')
             if line == '':
                 break
             self.info.append(line)

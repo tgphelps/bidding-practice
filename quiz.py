@@ -15,10 +15,8 @@ Options and commands:
 """
 
 
-import sys
 import docopt  # type: ignore
-from typing import TextIO, Optional
-import question
+from exercise import Exercise
 
 
 def main() -> None:
@@ -31,84 +29,68 @@ def main() -> None:
     with open(fname) as f:
         print()
         while True:
-            qu = read_question(f)
-            if not qu:
+            ex = Exercise(f)
+            if not ex.valid:
                 break
             if keyword != '':
-                if keyword not in qu.keywords:
+                if keyword not in ex.keys:
                     continue
-            ask_question(qu)
+            want_more = ask_question(ex)
+            if not want_more:
+                break
 
 
-def read_question(f: TextIO) -> Optional[question.Question]:
-    line = question.get_line(f)
-    # print('Reading question...')
-    if line == 'Question':
-        return question.Question(f)
-    else:
-        if line != 'End':
-            print('line:', line)
-            assert False
-        return None
-
-
-def ask_question(qu: question.Question) -> None:
-    normalize_auction(qu)
-    for step in qu.steps:
-        print('step...')
-        update_auction(qu, step)
-        show_auction(qu)
-        qu.hand.print()
-        print()
-        ans = get_user_bid()
-        if ans == step.answer:
-            print('Correct')
-        else:
-            print('No')
-            print_explanation(step.expl)
-        ans = input("Continue? ('n' to quit) ")
-        if ans == 'n':
-            print('Exiting.')
-            sys.exit(0)
-        # Going to next step
-        qu.auction.remove('?')
+def ask_question(ex: Exercise) -> bool:
+    # clear screen
+    # show info lines
+    # show hand
+    # for _ in range(len(answers)):
+    #     show auction out to first '*', ending with '?'.
+    #     remove the '*'
+    #     get answer
+    #     show yes/no
+    #     show explanation if wrong
+    # ask if we should continue
+    # return True if yes, False if no
+    print('asking...', ex)
+    return True
 
 
 # This tells how far to shift the auction so North's bids are on the left.
 BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
 
 
-def normalize_auction(qu: question.Question) -> None:
-    # Normalize auction, so North's bids are on the left.
-    bids = qu.auction
-    # bids.append('?')
-    if qu.dealer != 'n':
-        count = BID_PADDING[qu.dealer]
-        for i in range(count):
-            bids.insert(0, '-')
+# def normalize_auction(qu: question.Question) -> None:
+#     # Normalize auction, so North's bids are on the left.
+#     bids = qu.auction
+#     # bids.append('?')
+#     if qu.dealer != 'n':
+#         count = BID_PADDING[qu.dealer]
+#         for i in range(count):
+#             bids.insert(0, '-')
 
 
-def update_auction(qu: question.Question, step: question.Step) -> None:
-    for bid in step.auction:
-        qu.auction.append(bid)
-    qu.auction.append('?')
+# def update_auction(qu: question.Question, step: question.Step) -> None:
+#     for bid in step.auction:
+#         qu.auction.append(bid)
+#     qu.auction.append('?')
 
 
-def show_auction(qu: question.Question) -> None:
-    for i in range(15):
-        print()
-    print('-----------------------------')
-    print('\nVulnerability:', qu.vulnerable)
-    print(f'Dealer: {qu.dealer}\n')
-    print('North   East  South   West')
-    print('------ ------ ------ ------')
-    auc = qu.auction
-    i = 0
-    while i < len(auc):
-        bids = [x.ljust(6) for x in auc[i:i+4]]
-        print(' '.join(bids))
-        i += 4
-    print('-----------------------------')
+# def show_auction(qu: question.Question) -> None:
+#     for i in range(15):
+#         print()
+#     print('-----------------------------')
+#     print('\nVulnerability:', qu.vulnerable)
+#     print(f'Dealer: {qu.dealer}\n')
+#     print('North   East  South   West')
+#     print('------ ------ ------ ------')
+#     auc = qu.auction
+#     i = 0
+#     while i < len(auc):
+#         bids = [x.ljust(6) for x in auc[i:i+4]]
+#         print(' '.join(bids))
+#         i += 4
+#     print('-----------------------------')
 
 
 def get_user_bid() -> str:

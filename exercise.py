@@ -1,4 +1,5 @@
 
+import logging
 import random
 import sys
 from collections import Counter
@@ -148,8 +149,8 @@ def get_line(f: TextIO, allow_eof=False) -> str:
             if allow_eof:
                 return ')EOF('
             else:
-                print('Unexpected EOF.')
-                assert False
+                logging.fatal('Unexpected EOF.')
+                sys.exit(1)
         if line.startswith('#'):
             continue
         line = line.rstrip()

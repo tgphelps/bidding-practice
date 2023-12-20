@@ -15,11 +15,38 @@ Options and commands:
 """
 
 
+import curses
+import logging
+import sys
 import docopt  # type: ignore
 from exercise import Exercise
 
 
-def main() -> None:
+VERSION = '0.01'
+LOG_LEVEL = 'DEBUG'
+
+
+class Window:
+    scr: curses.window
+    rows: int
+    cols: int
+
+    def __init__(self, win: curses.window):
+        self.scr = win
+        curses.mousemask(1)
+        self.rows, self.cols = self.scr.getmaxyx()
+
+
+def main(scr) -> None:
+    logging.basicConfig(level=LOG_LEVEL, filename='LOG.txt',
+                        format='%(asctime)s %(levelname)s %(message)s')
+    logging.debug(f'quiz.py {VERSION}')
+
+    win = Window(scr)
+    logging.debug(f'screen rows: {win.rows} cols: {win.cols}')
+    if win.rows < 35 or win.cols < 80:
+        logging.fatal('Screen must be at least 40x80.')
+        sys.exit(1)
     keyword = ''
     args = docopt.docopt(__doc__, version='0.01')
     # print(args)
@@ -27,7 +54,6 @@ def main() -> None:
     if args['-k']:
         keyword = args['-k']
     with open(fname) as f:
-        print()
         while True:
             ex = Exercise(f)
             if not ex.valid:
@@ -35,15 +61,35 @@ def main() -> None:
             if keyword != '':
                 if keyword not in ex.keys:
                     continue
-            want_more = ask_question(ex)
+            want_more = ask_question(ex, win)
             if not want_more:
                 break
 
 
-def ask_question(ex: Exercise) -> bool:
+def ask_question(ex: Exercise, win: Window) -> bool:
+    logging.debug('asking...')
     # clear screen
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    win.scr.bkgd(' ', curses.color_pair(1))  # | curses.A_BOLD)
     # show info lines
     # show hand
+    win.scr.refresh()
+    errors = 0
+    try:
+        c = win.scr.getch()
+        if c == ord('q'):
+            sys.exit(1)
+        if c == curses.KEY_MOUSE:
+            pass
+            # read_mouse()
+        if c == curses.KEY_RESIZE:
+            pass
+            # win.resize()
+            # resized += 1
+    except curses.error:
+        errors += 1
+        logging.debug('curses error')
+        pass
     # for _ in range(len(answers)):
     #     show auction out to first '*', ending with '?'.
     #     remove the '*'
@@ -52,7 +98,6 @@ def ask_question(ex: Exercise) -> bool:
     #     show explanation if wrong
     # ask if we should continue
     # return True if yes, False if no
-    print('asking...', ex)
     return True
 
 
@@ -104,4 +149,4 @@ def print_explanation(expl: list[str]) -> None:
 
 
 if __name__ == '__main__':
-    main()
+    curses.wrapper(main)

@@ -25,6 +25,16 @@ from exercise import Exercise
 VERSION = '0.01'
 LOG_LEVEL = 'DEBUG'
 
+ROW_TOP = 1
+ROW_HAND = 18
+ROW_BID_BOX = 18
+COL_BID_BOX = 40
+ROW_DIVIDER = 25
+ROW_RESULT = 26
+ROW_EXPL = 27
+ROW_BOTTOM = 32
+ROW_AUCTION = 11
+
 
 class Window:
     scr: curses.window
@@ -68,41 +78,84 @@ def main(scr) -> None:
 
 def ask_question(ex: Exercise, win: Window) -> bool:
     logging.debug('asking...')
-    # clear screen
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
     win.scr.bkgd(' ', curses.color_pair(1))  # | curses.A_BOLD)
-    # show info lines
-    # show hand
+    win.scr.clear()
+    show_screen_top(ex, win.scr, ROW_TOP)
+    show_hand(ex, win.scr, ROW_HAND)
+    show_bid_box(win.scr, ROW_BID_BOX, COL_BID_BOX)
+    win.scr.addstr(ROW_DIVIDER, 0, '------------------------------')
+    win.scr.addstr(ROW_BOTTOM, 0, '<Continue>  <Quit>')
     win.scr.refresh()
-    errors = 0
-    try:
-        c = win.scr.getch()
-        if c == ord('q'):
-            sys.exit(1)
-        if c == curses.KEY_MOUSE:
+
+    for i, answer in enumerate(ex.answers):
+        show_auction(win.scr, ROW_AUCTION)
+        bid = get_bid(win.scr)
+        if bid == ex.answers[i].bid:
+            win.scr.addstr(ROW_RESULT, 0, 'Yes  ')
+        else:
+            win.scr.addstr(ROW_RESULT, 0, 'WRONG')
+            show_explanation(win.scr, ROW_EXPL, ex.answers[i].expl)
+        try:
+            c = win.scr.getch()
+            if c == ord('q'):
+                sys.exit(1)
+            if c == curses.KEY_MOUSE:
+                pass
+                # read_mouse()
+        except curses.error:
+            logging.debug('curses error')
             pass
-            # read_mouse()
-        if c == curses.KEY_RESIZE:
-            pass
-            # win.resize()
-            # resized += 1
-    except curses.error:
-        errors += 1
-        logging.debug('curses error')
-        pass
-    # for _ in range(len(answers)):
-    #     show auction out to first '*', ending with '?'.
-    #     remove the '*'
-    #     get answer
-    #     show yes/no
-    #     show explanation if wrong
-    # ask if we should continue
-    # return True if yes, False if no
     return True
 
 
+def show_screen_top(ex: Exercise, scr: curses.window, row: int) -> None:
+    for i, line in enumerate(ex.info):
+        scr.addstr(row + i, 0, line)
+    scr.addstr(row + 5, 0, '--------------------------------')
+    s = f'Dealer: {ex.dealer}  Vulnerable: {ex.vulnerable}'
+    scr.addstr(row + 6, 0, s)
+    scr.addstr(row + 8, 0, 'North East  South West')
+    scr.addstr(row + 9, 0, '----- ----- ----- -----')
+
+
+def show_hand(ex: Exercise, scr: curses.window, row: int) -> None:
+    scr.addstr(row, 0, '---------- Your hand ----------')
+    row += 2
+    for i, suit in enumerate(ex.hand.suits):
+        scr.addstr(row + i, 0, suit)
+
+
+def show_bid_box(scr: curses.window, row: int, col: int) -> None:
+    scr.addstr(row, col, '    BID BOX')
+    scr.addstr(row + 1, col, '--------------------')
+    scr.addstr(row + 2, col, '7C  7D  7H  7S  7NT')
+    scr.addstr(row + 3, col, '6C  6D  6H  6S  6NT')
+    scr.addstr(row + 4, col, '5C  5D  5H  5S  5NT')
+    scr.addstr(row + 4, col, '4C  4D  4H  4S  4NT')
+    scr.addstr(row + 5, col, '3C  3D  3H  3S  3NT')
+    scr.addstr(row + 6, col, '2C  2D  2H  2S  2NT')
+    scr.addstr(row + 7, col, '1C  1D  1H  1S  1NT')
+    scr.addstr(row + 8, col, 'PASS  DBL   RDBL')
+
+
+def show_auction(scr: curses.window, row: int) -> None:
+    pass
+
+
+def get_bid(scr: curses.window) -> str:
+    return 'P'
+
+
+def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
+    for i in range(4):
+        scr.addstr(row + i, 0, 80 * ' ')
+    for i, line in enumerate(expl):
+        scr.addstr(row + i, 0, line)
+
+
 # This tells how far to shift the auction so North's bids are on the left.
-BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
+# BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
 
 
 # def normalize_auction(qu: question.Question) -> None:

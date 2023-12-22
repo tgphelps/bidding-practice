@@ -27,7 +27,7 @@ LOG_LEVEL = 'DEBUG'
 
 ROW_TOP = 1
 ROW_HAND = 18
-ROW_BID_BOX = 18
+ROW_BID_BOX = 17
 COL_BID_BOX = 40
 ROW_DIVIDER = 25
 ROW_RESULT = 26
@@ -78,7 +78,7 @@ def main(scr) -> None:
 
 def ask_question(ex: Exercise, win: Window) -> bool:
     logging.debug('asking...')
-    curses.init_pair(1, curses.COLOR_BLACK, curses.COLOR_WHITE)
+    curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLUE)
     win.scr.bkgd(' ', curses.color_pair(1))  # | curses.A_BOLD)
     win.scr.clear()
     show_screen_top(ex, win.scr, ROW_TOP)
@@ -89,23 +89,15 @@ def ask_question(ex: Exercise, win: Window) -> bool:
     win.scr.refresh()
 
     for i, answer in enumerate(ex.answers):
-        show_auction(win.scr, ROW_AUCTION)
+        show_auction(win.scr, ROW_AUCTION, ex.auction)
         bid = get_bid(win.scr)
         if bid == ex.answers[i].bid:
             win.scr.addstr(ROW_RESULT, 0, 'Yes  ')
         else:
             win.scr.addstr(ROW_RESULT, 0, 'WRONG')
             show_explanation(win.scr, ROW_EXPL, ex.answers[i].expl)
-        try:
-            c = win.scr.getch()
-            if c == ord('q'):
-                sys.exit(1)
-            if c == curses.KEY_MOUSE:
-                pass
-                # read_mouse()
-        except curses.error:
-            logging.debug('curses error')
-            pass
+        logging.debug('wait for click')
+        _, _ = get_mouse_click(win.scr)
     return True
 
 
@@ -132,19 +124,56 @@ def show_bid_box(scr: curses.window, row: int, col: int) -> None:
     scr.addstr(row + 2, col, '7C  7D  7H  7S  7NT')
     scr.addstr(row + 3, col, '6C  6D  6H  6S  6NT')
     scr.addstr(row + 4, col, '5C  5D  5H  5S  5NT')
-    scr.addstr(row + 4, col, '4C  4D  4H  4S  4NT')
-    scr.addstr(row + 5, col, '3C  3D  3H  3S  3NT')
-    scr.addstr(row + 6, col, '2C  2D  2H  2S  2NT')
-    scr.addstr(row + 7, col, '1C  1D  1H  1S  1NT')
-    scr.addstr(row + 8, col, 'PASS  DBL   RDBL')
+    scr.addstr(row + 5, col, '4C  4D  4H  4S  4NT')
+    scr.addstr(row + 6, col, '3C  3D  3H  3S  3NT')
+    scr.addstr(row + 7, col, '2C  2D  2H  2S  2NT')
+    scr.addstr(row + 8, col, '1C  1D  1H  1S  1NT')
+    scr.addstr(row + 9, col, 'PASS  DBL   RDBL')
 
 
-def show_auction(scr: curses.window, row: int) -> None:
-    pass
+def show_auction(scr: curses.window, row: int, auction: list[str]) -> None:
+    next = []
+    for bid in auction:
+        if bid.startswith('*'):
+            break
+        next.append(bid)
+    n = len(next)
+    auction[n] = auction[n][1:]
+    next.append('?')
+    scr.addstr(row, 0, ' '.join(next))
 
 
 def get_bid(scr: curses.window) -> str:
-    return 'P'
+    logging.debug('get_bid')
+    top = ROW_BID_BOX
+    while True:
+        x, y = get_mouse_click(scr)
+        logging.debug(f'click y: {y}  x: {x}')
+        if x >= 39 and x <= 57 and y >= top + 2 and y <= top + 8:
+            bid = level_and_suit(y, x)
+            logging.debug(f'bid was: {bid}')
+            return bid
+        if y == top + 9 and x >= 39 and x <= 54:
+            bid = pass_dbl_rdbl(x)
+            logging.debug(f'bid was: {bid}')
+            return bid
+
+
+SUITS = ('C', 'D', 'H', 'S', 'NT')
+
+
+def level_and_suit(y: int, x: int) -> str:
+    level = 7 - (y - ROW_BID_BOX - 2)
+    suit = (x - COL_BID_BOX) // 4
+    return str(level) + SUITS[suit]
+
+
+CALLS = ('PASS', 'DBL', 'RDBL')
+
+
+def pass_dbl_rdbl(x: int) -> str:
+    offset = (x - COL_BID_BOX) // 6
+    return CALLS[offset]
 
 
 def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
@@ -168,12 +197,6 @@ def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
 #             bids.insert(0, '-')
 
 
-# def update_auction(qu: question.Question, step: question.Step) -> None:
-#     for bid in step.auction:
-#         qu.auction.append(bid)
-#     qu.auction.append('?')
-
-
 # def show_auction(qu: question.Question) -> None:
 #     for i in range(15):
 #         print()
@@ -189,6 +212,22 @@ def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
 #         print(' '.join(bids))
 #         i += 4
 #     print('-----------------------------')
+
+
+def get_mouse_click(scr: curses.window) -> tuple[int, int]:
+    x = 0
+    y = 0
+    try:
+        c = scr.getch()
+        if c == ord('q'):
+            sys.exit(1)
+        if c == curses.KEY_MOUSE:
+            _, x, y, _, _ = curses.getmouse()
+            logging.debug(f'mouse: x: {x}  y: {y}')
+    except curses.error:
+        logging.debug('curses error')
+        sys.exit(1)
+    return x, y
 
 
 def get_user_bid() -> str:

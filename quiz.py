@@ -25,6 +25,12 @@ from exercise import Exercise
 VERSION = '0.01'
 LOG_LEVEL = 'DEBUG'
 
+SUIT_SYMS = "\u2660\u2665\u2666\u2663"
+C = SUIT_SYMS[3]
+D = SUIT_SYMS[2]
+H = SUIT_SYMS[1]
+S = SUIT_SYMS[0]
+
 ROW_TOP = 1
 ROW_HAND = 18
 ROW_BID_BOX = 17
@@ -79,7 +85,7 @@ def main(scr) -> None:
 def ask_question(ex: Exercise, win: Window) -> bool:
     logging.debug('asking...')
     curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLUE)
-    win.scr.bkgd(' ', curses.color_pair(1))  # | curses.A_BOLD)
+    win.scr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
     win.scr.clear()
     show_screen_top(ex, win.scr, ROW_TOP)
     show_hand(ex, win.scr, ROW_HAND)
@@ -91,10 +97,11 @@ def ask_question(ex: Exercise, win: Window) -> bool:
     for i, answer in enumerate(ex.answers):
         show_auction(win.scr, ROW_AUCTION, ex.auction)
         bid = get_bid(win.scr)
+        win.scr.addstr(ROW_RESULT, 0, bid)
         if bid == ex.answers[i].bid:
-            win.scr.addstr(ROW_RESULT, 0, 'Yes  ')
+            win.scr.addstr(ROW_RESULT, 6, 'Yes  ')
         else:
-            win.scr.addstr(ROW_RESULT, 0, 'WRONG')
+            win.scr.addstr(ROW_RESULT, 6, 'WRONG')
             show_explanation(win.scr, ROW_EXPL, ex.answers[i].expl)
         logging.debug('wait for click')
         _, _ = get_mouse_click(win.scr)
@@ -115,19 +122,19 @@ def show_hand(ex: Exercise, scr: curses.window, row: int) -> None:
     scr.addstr(row, 0, '---------- Your hand ----------')
     row += 2
     for i, suit in enumerate(ex.hand.suits):
-        scr.addstr(row + i, 0, suit)
+        scr.addstr(row + i, 0, f'{SUIT_SYMS[i]} {suit}')
 
 
 def show_bid_box(scr: curses.window, row: int, col: int) -> None:
     scr.addstr(row, col, '    BID BOX')
     scr.addstr(row + 1, col, '--------------------')
-    scr.addstr(row + 2, col, '7C  7D  7H  7S  7NT')
-    scr.addstr(row + 3, col, '6C  6D  6H  6S  6NT')
-    scr.addstr(row + 4, col, '5C  5D  5H  5S  5NT')
-    scr.addstr(row + 5, col, '4C  4D  4H  4S  4NT')
-    scr.addstr(row + 6, col, '3C  3D  3H  3S  3NT')
-    scr.addstr(row + 7, col, '2C  2D  2H  2S  2NT')
-    scr.addstr(row + 8, col, '1C  1D  1H  1S  1NT')
+    scr.addstr(row + 2, col, f'7{C}  7{D}  7{H}  7{S}  7NT')
+    scr.addstr(row + 3, col, f'6{C}  6{D}  6{H}  6{S}  6NT')
+    scr.addstr(row + 4, col, f'5{C}  5{D}  5{H}  5{S}  5NT')
+    scr.addstr(row + 5, col, f'4{C}  4{D}  4{H}  4{S}  4NT')
+    scr.addstr(row + 6, col, f'3{C}  3{D}  3{H}  3{S}  3NT')
+    scr.addstr(row + 7, col, f'2{C}  2{D}  2{H}  2{S}  2NT')
+    scr.addstr(row + 8, col, f'1{C}  1{D}  1{H}  1{S}  1NT')
     scr.addstr(row + 9, col, 'PASS  DBL   RDBL')
 
 
@@ -140,7 +147,15 @@ def show_auction(scr: curses.window, row: int, auction: list[str]) -> None:
     n = len(next)
     auction[n] = auction[n][1:]
     next.append('?')
-    scr.addstr(row, 0, ' '.join(next))
+    # scr.addstr(row, 0, ' '.join(next))
+    i = 0
+    while i < len(next):
+        this_line = next[i:i + 4]
+        s = ''
+        for bid in this_line:
+            s += f'{bid:6}'
+        scr.addstr(row + i // 4, 0, s)
+        i += 4
 
 
 def get_bid(scr: curses.window) -> str:

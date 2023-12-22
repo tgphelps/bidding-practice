@@ -25,7 +25,7 @@ from exercise import Exercise
 VERSION = '0.01'
 LOG_LEVEL = 'DEBUG'
 
-SUIT_SYMS = "\u2660\u2665\u2666\u2663"
+SUIT_SYMS = "\u2660\u2665\u2666\u2663"  # spade, heart, diamond, club
 C = SUIT_SYMS[3]
 D = SUIT_SYMS[2]
 H = SUIT_SYMS[1]
@@ -40,6 +40,10 @@ ROW_RESULT = 26
 ROW_EXPL = 27
 ROW_BOTTOM = 32
 ROW_AUCTION = 11
+
+
+class MyError(Exception):
+    pass
 
 
 class Window:
@@ -62,7 +66,7 @@ def main(scr) -> None:
     logging.debug(f'screen rows: {win.rows} cols: {win.cols}')
     if win.rows < 35 or win.cols < 80:
         logging.fatal('Screen must be at least 40x80.')
-        sys.exit(1)
+        raise MyError('Screen must be at least 40x80')
     keyword = ''
     args = docopt.docopt(__doc__, version='0.01')
     # print(args)
@@ -83,7 +87,7 @@ def main(scr) -> None:
 
 
 def ask_question(ex: Exercise, win: Window) -> bool:
-    logging.debug('asking...')
+    logging.debug('New question')
     curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLUE)
     win.scr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
     win.scr.clear()
@@ -91,10 +95,11 @@ def ask_question(ex: Exercise, win: Window) -> bool:
     show_hand(ex, win.scr, ROW_HAND)
     show_bid_box(win.scr, ROW_BID_BOX, COL_BID_BOX)
     win.scr.addstr(ROW_DIVIDER, 0, '------------------------------')
-    win.scr.addstr(ROW_BOTTOM, 0, '<Continue>  <Quit>')
+    # win.scr.addstr(ROW_BOTTOM, 0, '<Continue>  <Quit>')
     win.scr.refresh()
 
     for i, answer in enumerate(ex.answers):
+        logging.debug('Next auction.')
         show_auction(win.scr, ROW_AUCTION, ex.auction)
         bid = get_bid(win.scr)
         win.scr.addstr(ROW_RESULT, 0, bid)
@@ -198,38 +203,11 @@ def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
         scr.addstr(row + i, 0, line)
 
 
-# This tells how far to shift the auction so North's bids are on the left.
-# BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
-
-
-# def normalize_auction(qu: question.Question) -> None:
-#     # Normalize auction, so North's bids are on the left.
-#     bids = qu.auction
-#     # bids.append('?')
-#     if qu.dealer != 'n':
-#         count = BID_PADDING[qu.dealer]
-#         for i in range(count):
-#             bids.insert(0, '-')
-
-
-# def show_auction(qu: question.Question) -> None:
-#     for i in range(15):
-#         print()
-#     print('-----------------------------')
-#     print('\nVulnerability:', qu.vulnerable)
-#     print(f'Dealer: {qu.dealer}\n')
-#     print('North   East  South   West')
-#     print('------ ------ ------ ------')
-#     auc = qu.auction
-#     i = 0
-#     while i < len(auc):
-#         bids = [x.ljust(6) for x in auc[i:i+4]]
-#         print(' '.join(bids))
-#         i += 4
-#     print('-----------------------------')
+click_count = 0
 
 
 def get_mouse_click(scr: curses.window) -> tuple[int, int]:
+    global click_count
     x = 0
     y = 0
     try:
@@ -237,11 +215,13 @@ def get_mouse_click(scr: curses.window) -> tuple[int, int]:
         if c == ord('q'):
             sys.exit(1)
         if c == curses.KEY_MOUSE:
+            click_count += 1
             _, x, y, _, _ = curses.getmouse()
-            logging.debug(f'mouse: x: {x}  y: {y}')
+            logging.debug(f'mouse: y: {y}  x: {x}')
+            debug(scr, f'click {click_count}  y: {y}, x: {x}')
     except curses.error:
         logging.debug('curses error')
-        sys.exit(1)
+        raise MyError('curses error')
     return x, y
 
 
@@ -253,6 +233,12 @@ def get_user_bid() -> str:
 def print_explanation(expl: list[str]) -> None:
     for line in expl:
         print(line)
+
+
+def debug(scr: curses.window, msg: str) -> None:
+    scr.move(ROW_BOTTOM, 0)
+    scr.clrtoeol()
+    scr.addstr(ROW_BOTTOM, 0, msg)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@
 quiz.py: Display questions and check answers
 
 Usage:
-    quiz.py [-k <key>] QUESTIONS
+    quiz.py [-k <key>] QUESTIONS...
     quiz.py   --version
     quiz.py   --help
 
@@ -17,7 +17,7 @@ Options and commands:
 
 import curses
 import logging
-import sys
+# import sys
 import docopt  # type: ignore
 from exercise import Exercise
 
@@ -38,7 +38,8 @@ COL_BID_BOX = 40
 ROW_DIVIDER = 25
 ROW_RESULT = 26
 ROW_EXPL = 27
-ROW_BOTTOM = 32
+ROW_HINT = 29
+ROW_DEBUG = 35
 ROW_AUCTION = 11
 
 BG_COLOR = curses.COLOR_BLUE
@@ -67,13 +68,13 @@ def main(scr) -> None:
 
     win = Window(scr)
     logging.debug(f'screen rows: {win.rows} cols: {win.cols}')
-    if win.rows < 35 or win.cols < 80:
+    if win.rows < 40 or win.cols < 80:
         logging.fatal('Screen must be at least 40x80.')
         raise MyError('Screen must be at least 40x80')
     keyword = ''
     args = docopt.docopt(__doc__, version='0.01')
-    # print(args)
-    fname = args['QUESTIONS']
+    logging.debug(args)
+    fname = args['QUESTIONS'][0]
     if args['-k']:
         keyword = args['-k']
     with open(fname) as f:
@@ -84,12 +85,12 @@ def main(scr) -> None:
             if keyword != '':
                 if keyword not in ex.keys:
                     continue
-            want_more = ask_question(ex, win)
+            want_more = show_exercise(ex, win)
             if not want_more:
                 break
 
 
-def ask_question(ex: Exercise, win: Window) -> bool:
+def show_exercise(ex: Exercise, win: Window) -> bool:
     logging.debug('New question')
     curses.init_pair(1, FG_COLOR, BG_COLOR)
     win.scr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
@@ -99,7 +100,7 @@ def ask_question(ex: Exercise, win: Window) -> bool:
     show_hand(ex, win.scr, ROW_HAND)
     show_bid_box(win.scr, ROW_BID_BOX, COL_BID_BOX)
     win.scr.addstr(ROW_DIVIDER, 0, '------------------------------')
-    # win.scr.addstr(ROW_BOTTOM, 0, '<Continue>  <Quit>')
+    win.scr.addstr(ROW_HINT, 0, "Click to bid, ' ' to continue, 'q' to quit")
     win.scr.refresh()
 
     for i, answer in enumerate(ex.answers):
@@ -113,7 +114,9 @@ def ask_question(ex: Exercise, win: Window) -> bool:
             win.scr.addstr(ROW_RESULT, 6, 'WRONG')
             show_explanation(win.scr, ROW_EXPL, ex.answers[i].expl)
         logging.debug('wait for click')
-        _, _ = get_mouse_click(win.scr)
+        _, _, ch = get_mouse_click(win.scr)
+        if ch == ord('q'):
+            return False
     return True
 
 
@@ -176,7 +179,7 @@ def get_bid(scr: curses.window) -> str:
     left = COL_BID_BOX
     # Loop until he clicks somewhere in the bidbox.
     while True:
-        x, y = get_mouse_click(scr)
+        x, y, ch = get_mouse_click(scr)
         logging.debug(f'click y: {y}  x: {x}')
         if x >= left and x < left + 20 and y >= top + 2 and y < top + 7 + 2:
             bid = level_and_suit(y, x)
@@ -217,15 +220,16 @@ def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
 click_count = 0
 
 
-def get_mouse_click(scr: curses.window) -> tuple[int, int]:
+def get_mouse_click(scr: curses.window) -> tuple[int, int, int]:
+    " return x, y, char"
     global click_count
     x = -1
     y = -1
     try:
-        c = scr.getch()
-        if c == ord('q'):  # XXX Probably not good code.
-            sys.exit(1)
-        if c == curses.KEY_MOUSE:
+        ch = scr.getch()
+        if ch == ord('q'):  # XXX Probably not good code.
+            return x, y, ch
+        if ch == curses.KEY_MOUSE:
             click_count += 1
             _, x, y, _, _ = curses.getmouse()
             logging.debug(f'mouse: y: {y}  x: {x}')
@@ -233,7 +237,7 @@ def get_mouse_click(scr: curses.window) -> tuple[int, int]:
     except curses.error:
         logging.debug('curses error')
         raise MyError('curses error')
-    return x, y  # If he hit a key, (x,y) will be (-1,-1).
+    return x, y, ch  # If he hit a key, (x,y) will be (-1,-1).
 
 
 # def get_user_bid() -> str:
@@ -248,9 +252,9 @@ def print_explanation(expl: list[str]) -> None:
 
 def debug(scr: curses.window, msg: str) -> None:
     "Write a message to the bottom line on screen."
-    scr.move(ROW_BOTTOM, 0)
+    scr.move(ROW_DEBUG, 0)
     scr.clrtoeol()
-    scr.addstr(ROW_BOTTOM, 0, msg)
+    scr.addstr(ROW_DEBUG, 0, 'debug: ' + msg)
 
 
 if __name__ == '__main__':

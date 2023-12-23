@@ -41,6 +41,9 @@ ROW_EXPL = 27
 ROW_BOTTOM = 32
 ROW_AUCTION = 11
 
+BG_COLOR = curses.COLOR_BLUE
+FG_COLOR = curses.COLOR_WHITE
+
 
 class MyError(Exception):
     pass
@@ -58,7 +61,7 @@ class Window:
 
 
 def main(scr) -> None:
-    logging.basicConfig(level=LOG_LEVEL, filename='LOG.txt',
+    logging.basicConfig(level=LOG_LEVEL, filename='LOG.txt', filemode='w',
                         format='%(asctime)s %(levelname)s %(message)s')
     logging.debug(f'quiz.py {VERSION}')
 
@@ -88,9 +91,10 @@ def main(scr) -> None:
 
 def ask_question(ex: Exercise, win: Window) -> bool:
     logging.debug('New question')
-    curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLUE)
+    curses.init_pair(1, FG_COLOR, BG_COLOR)
     win.scr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
     win.scr.clear()
+
     show_screen_top(ex, win.scr, ROW_TOP)
     show_hand(ex, win.scr, ROW_HAND)
     show_bid_box(win.scr, ROW_BID_BOX, COL_BID_BOX)
@@ -145,15 +149,17 @@ def show_bid_box(scr: curses.window, row: int, col: int) -> None:
 
 def show_auction(scr: curses.window, row: int, auction: list[str]) -> None:
     next = []
+    # Append bids to 'next' until we find one that starts with '*'.
     for bid in auction:
         if bid.startswith('*'):
             break
         next.append(bid)
     n = len(next)
-    auction[n] = auction[n][1:]
+    auction[n] = auction[n][1:]  # remove the '*' from this bid
     next.append('?')
     # scr.addstr(row, 0, ' '.join(next))
     i = 0
+    # Print the auction, 4 bids on each line.
     while i < len(next):
         this_line = next[i:i + 4]
         s = ''
@@ -164,12 +170,15 @@ def show_auction(scr: curses.window, row: int, auction: list[str]) -> None:
 
 
 def get_bid(scr: curses.window) -> str:
+    "Translate a bidbox click to a bid."
     logging.debug('get_bid')
     top = ROW_BID_BOX
+    left = COL_BID_BOX
+    # Loop until he clicks somewhere in the bidbox.
     while True:
         x, y = get_mouse_click(scr)
         logging.debug(f'click y: {y}  x: {x}')
-        if x >= 39 and x <= 57 and y >= top + 2 and y <= top + 8:
+        if x >= left and x < left + 20 and y >= top + 2 and y < top + 7 + 2:
             bid = level_and_suit(y, x)
             logging.debug(f'bid was: {bid}')
             return bid
@@ -183,6 +192,7 @@ SUITS = ('C', 'D', 'H', 'S', 'NT')
 
 
 def level_and_suit(y: int, x: int) -> str:
+    "Translate click to <level><suit>."
     level = 7 - (y - ROW_BID_BOX - 2)
     suit = (x - COL_BID_BOX) // 4
     return str(level) + SUITS[suit]
@@ -192,6 +202,7 @@ CALLS = ('PASS', 'DBL', 'RDBL')
 
 
 def pass_dbl_rdbl(x: int) -> str:
+    "Translate click to PASS, DBL, or RDBL."
     offset = (x - COL_BID_BOX) // 6
     return CALLS[offset]
 
@@ -208,11 +219,11 @@ click_count = 0
 
 def get_mouse_click(scr: curses.window) -> tuple[int, int]:
     global click_count
-    x = 0
-    y = 0
+    x = -1
+    y = -1
     try:
         c = scr.getch()
-        if c == ord('q'):
+        if c == ord('q'):  # XXX Probably not good code.
             sys.exit(1)
         if c == curses.KEY_MOUSE:
             click_count += 1
@@ -222,12 +233,12 @@ def get_mouse_click(scr: curses.window) -> tuple[int, int]:
     except curses.error:
         logging.debug('curses error')
         raise MyError('curses error')
-    return x, y
+    return x, y  # If he hit a key, (x,y) will be (-1,-1).
 
 
-def get_user_bid() -> str:
-    ans = input('Your bid? ')
-    return ans
+# def get_user_bid() -> str:
+#     ans = input('Your bid? ')
+#     return ans
 
 
 def print_explanation(expl: list[str]) -> None:
@@ -236,6 +247,7 @@ def print_explanation(expl: list[str]) -> None:
 
 
 def debug(scr: curses.window, msg: str) -> None:
+    "Write a message to the bottom line on screen."
     scr.move(ROW_BOTTOM, 0)
     scr.clrtoeol()
     scr.addstr(ROW_BOTTOM, 0, msg)

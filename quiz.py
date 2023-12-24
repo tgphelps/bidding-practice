@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 
 """
-quiz.py: Display questions and check answers
+quiz.py: Display bidding exercises and check answers
 
 Usage:
-    quiz.py [-k <key>] QUESTIONS...
+    quiz.py [-k <key>] EXERCISES...
     quiz.py   --version
     quiz.py   --help
 
 Options and commands:
     --version          Show version and exit.
     -h --help          Show this message and exit.
-    -k <key>           Show only questions with this keyword.
+    -k <key>           Show only exercises with this keyword.
 """
 
 
 import curses
 import logging
-# import sys
+import sys
 import docopt  # type: ignore
 from exercise import Exercise
 
@@ -50,6 +50,16 @@ class MyError(Exception):
     pass
 
 
+class Globals:
+    click_count: int
+    exercises: list[Exercise]
+
+
+g = Globals()
+g.click_count = 0
+g.exercises = []
+
+
 class Window:
     scr: curses.window
     rows: int
@@ -71,27 +81,46 @@ def main(scr) -> None:
     if win.rows < 40 or win.cols < 80:
         logging.fatal('Screen must be at least 40x80.')
         raise MyError('Screen must be at least 40x80')
-    keyword = ''
+    # keyword = ''
     args = docopt.docopt(__doc__, version='0.01')
     logging.debug(args)
-    fname = args['QUESTIONS'][0]
-    if args['-k']:
-        keyword = args['-k']
-    with open(fname) as f:
-        while True:
-            ex = Exercise(f)
-            if not ex.valid:
-                break
-            if keyword != '':
-                if keyword not in ex.keys:
-                    continue
-            want_more = show_exercise(ex, win)
-            if not want_more:
-                break
+    # if args['-k']:
+    #     keyword = args['-k']
+    g.exercises = read_exercises(args['EXERCISES'])
+    for ex in g.exercises:
+        want_more = show_exercise(ex, win)
+        if not want_more:
+            break
+    # with open(fname) as f:
+    #     while True:
+    #         ex = Exercise(f)
+    #         if not ex.valid:
+    #             break
+    #         if keyword != '':
+    #             if keyword not in ex.keys:
+    #                 continue
+    #         want_more = show_exercise(ex, win)
+    #         if not want_more:
+    #             break
+
+
+def read_exercises(files: list[str]) -> list[Exercise]:
+    ex_list: list[Exercise] = []
+    for fname in files:
+        logging.debug(f'Reading file {fname}')
+        with open(fname) as f:
+            while True:
+                ex = Exercise(f)
+                if not ex.valid:
+                    break
+                logging.debug('Read 1 exercise.')
+                ex_list.append(ex)
+    logging.debug(f'Total exercises read: {len(ex_list)}')
+    return ex_list
 
 
 def show_exercise(ex: Exercise, win: Window) -> bool:
-    logging.debug('New question')
+    logging.debug('New exercise')
     curses.init_pair(1, FG_COLOR, BG_COLOR)
     win.scr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
     win.scr.clear()
@@ -217,12 +246,8 @@ def show_explanation(scr: curses.window, row: int, expl: list[str]) -> None:
         scr.addstr(row + i, 0, line)
 
 
-click_count = 0
-
-
 def get_mouse_click(scr: curses.window) -> tuple[int, int, int]:
     " return x, y, char"
-    global click_count
     x = -1
     y = -1
     try:
@@ -230,10 +255,10 @@ def get_mouse_click(scr: curses.window) -> tuple[int, int, int]:
         if ch == ord('q'):  # XXX Probably not good code.
             return x, y, ch
         if ch == curses.KEY_MOUSE:
-            click_count += 1
+            g.click_count += 1
             _, x, y, _, _ = curses.getmouse()
             logging.debug(f'mouse: y: {y}  x: {x}')
-            debug(scr, f'click {click_count}  y: {y}, x: {x}')
+            debug(scr, f'click {g.click_count}  y: {y}, x: {x}')
     except curses.error:
         logging.debug('curses error')
         raise MyError('curses error')

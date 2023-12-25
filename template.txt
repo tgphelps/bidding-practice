@@ -1,0 +1,23 @@
+
+
+-----
+Keys:
+Dealer: x
+Vulnerable: xxx
+Info:
+ info
+
+Hand:
+
+HAND GOES HERE
+
+Auction:
+ N    E    S    W
+---- ---- ---- ----
+
+Answers:
+1 xx
+ expl
+
+=====
+

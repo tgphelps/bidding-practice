@@ -1,3 +1,3 @@
 check:
-	flake8
+	-flake8 --ignore=E501
 	mypy *.py

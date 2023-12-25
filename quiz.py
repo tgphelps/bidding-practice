@@ -35,7 +35,7 @@ S = SUIT_SYMS[0]
 
 ROW_TOP = 1
 ROW_HAND = 18
-ROW_BID_BOX = 17
+ROW_BID_BOX = 16
 COL_BID_BOX = 40
 ROW_DIVIDER = 25
 ROW_RESULT = 26
@@ -55,11 +55,15 @@ class MyError(Exception):
 class Globals:
     click_count: int
     exercises: list[Exercise]
+    total_answers: int
+    total_right: int
 
 
 g = Globals()
 g.click_count = 0
 g.exercises = []
+g.total_answers = 0
+g.total_right = 0
 
 
 class Window:
@@ -128,15 +132,20 @@ def show_exercise(ex: Exercise, win: Window) -> bool:
     win.scr.refresh()
 
     for i, answer in enumerate(ex.answers):
+        g.total_answers += 1
         logging.debug('Next auction.')
         show_auction(win.scr, ROW_AUCTION, ex.auction)
         bid = get_bid(win.scr)
         win.scr.addstr(ROW_RESULT, 0, bid)
         if bid == ex.answers[i].bid:
             win.scr.addstr(ROW_RESULT, 6, 'Yes  ')
+            g.total_right += 1
         else:
             win.scr.addstr(ROW_RESULT, 6, 'WRONG')
             show_explanation(win.scr, ROW_EXPL, ex.answers[i].expl)
+        pct = float(g.total_right / g.total_answers)
+        msg = f'Total: {g.total_answers}  Correct: {g.total_right}  Score: {100 * pct:2.0f} '
+        win.scr.addstr(ROW_RESULT, 15, msg)
         logging.debug('wait for click')
         _, _, ch = get_mouse_click(win.scr)
         if ch == ord('q'):

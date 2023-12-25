@@ -33,7 +33,14 @@ class Hand:
             self.suits.append(line)
             if len(self.suits) == 4:
                 break
-        # print('end hand')
+        # We should have exactly 13 cards.
+        cards = 0
+        for suit in self.suits:
+            fld = suit.split()
+            if fld[0] == '-':
+                continue
+            cards += len(fld)
+        assert cards == 13
 
     def __str__(self) -> str:
         ss: list[str] = []
@@ -69,11 +76,10 @@ class Exercise:
                 return
             if line.startswith('---'):
                 break
+        # We found the start of an exercise
         # Keys, Dealer, Vulnerable, Info, Hand, Auction, Answers
         while True:
             line = get_line(f)
-            # if line.startswith('==='):
-            #     break
             line = line.rstrip()
             # print('line:', line)
             if line.startswith('Keys:'):
@@ -94,6 +100,7 @@ class Exercise:
             elif line.startswith('Hand:'):
                 h = Hand(f)
                 self.hand = h
+                # WE should have a blank line next.
                 line = get_line(f)
                 line = line.rstrip()
                 assert line == ''
@@ -115,6 +122,7 @@ class Exercise:
             if line == '':
                 break
             self.info.append(line)
+        assert len(self.info) <= 4
 
     def store_auction(self, f: TextIO) -> None:
         line = get_line(f)
@@ -138,6 +146,7 @@ class Exercise:
             fld = line.split()
             bid = fld[1]
             expl = read_paragraph(f)
+            assert len(expl) <= 4
             self.answers.append(Answer(bid, expl))
 
 

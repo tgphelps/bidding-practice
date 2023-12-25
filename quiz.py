@@ -110,6 +110,7 @@ def read_exercises(files: list[str]) -> list[Exercise]:
         with open(fname) as f:
             while True:
                 ex = Exercise(f)
+                logging.debug('Return from Exercise()')
                 if not ex.valid:
                     break
                 logging.debug('Read 1 exercise.')

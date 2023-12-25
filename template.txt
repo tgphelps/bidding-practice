@@ -2,8 +2,8 @@
 
 -----
 Keys:
-Dealer: x
-Vulnerable: xxx
+Dealer: S
+Vulnerable: none
 Info:
  info
 
@@ -14,9 +14,10 @@ HAND GOES HERE
 Auction:
  N    E    S    W
 ---- ---- ---- ----
+ -    -    *1c
 
 Answers:
-1 xx
+1 1c
  expl
 
 =====

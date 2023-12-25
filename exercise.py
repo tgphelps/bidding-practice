@@ -72,16 +72,19 @@ class Exercise:
         while True:
             line = get_line(f, allow_eof=True)
             if line == ')EOF(':
+                logging.debug('Found EOF.')
                 self.valid = False
                 return
             if line.startswith('---'):
                 break
         # We found the start of an exercise
         # Keys, Dealer, Vulnerable, Info, Hand, Auction, Answers
+        logging.debug('Found start of exercise.')
         while True:
             line = get_line(f)
             line = line.rstrip()
-            # print('line:', line)
+            print('line:', line)
+            logging.debug('line: ' + line)
             if line.startswith('Keys:'):
                 fld = line.split()
                 self.keys = fld[1:]
@@ -111,6 +114,7 @@ class Exercise:
                 break
             else:
                 print('Invalid line:', line)
+                logging.debug('Invalid line: ' + line)
                 sys.exit(1)
 
     def store_info(self, f: TextIO) -> None:
@@ -144,7 +148,7 @@ class Exercise:
             if line.startswith('==='):
                 break
             fld = line.split()
-            bid = fld[1]
+            bid = fld[1].upper()
             expl = read_paragraph(f)
             assert len(expl) <= 4
             self.answers.append(Answer(bid, expl))

@@ -25,6 +25,15 @@ VERSION = '0.01'
 TEMPLATE = 'template.txt'
 
 
+class Hand:
+    comment: str
+    suits: list[str]
+
+    def __init__(self, label: str, suits: list[str]):
+        self.label = label
+        self.suits = suits
+
+
 def main() -> None:
     args = docopt.docopt(__doc__, version='0.01')
     fname = args['<hands>']
@@ -39,13 +48,13 @@ def main() -> None:
                 return
             if line.startswith('Hand'):
                 break
-        hand = read_hand(fh)
+        hand = read_hand(line, fh)
         write_exercise(template, hand, fex)
 
 
-def read_hand(fh: TextIO) -> list[str]:
+def read_hand(label: str, fh: TextIO) -> Hand:
     # print('read hand')
-    hand: list[str] = []
+    suits: list[str] = []
     while True:
         line = fh.readline()
         if line == '':
@@ -54,16 +63,22 @@ def read_hand(fh: TextIO) -> list[str]:
         # print('hand:', line)
         if line == '':
             break
-        hand.append(line)
-    return hand
+        suits.append(line)
+    return Hand(label, suits)
 
 
-def write_exercise(template: list[str], hand: list[str], fex: TextIO) -> None:
-    #print('write exercise')
+def write_exercise(template: list[str], hand: Hand, fex: TextIO) -> None:
+    # print('write exercise')
     for line in template:
         if line.startswith('HAND GOES HERE'):
-            for hand_line in hand:
-                print(hand_line, file=fex)
+            for suit in hand.suits:
+                print(suit, file=fex)
+            if '#' in hand.label:
+                i = hand.label.index('#')
+                comment = hand.label[i:]
+            else:
+                comment = '#'
+            print(comment, file=fex)
         else:
             print(line, file=fex)
 

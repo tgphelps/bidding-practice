@@ -7,7 +7,6 @@ from typing import TextIO
 
 
 SUIT_SYMS = "\u2660\u2665\u2666\u2663"
-# BID_PADDING = {'N': 0, 'E': 1, 'S': 2, 'W': 3}
 
 
 class Answer:
@@ -143,6 +142,7 @@ class Exercise:
 
 
 def get_line(f: TextIO, allow_eof=False) -> str:
+    "Return the next 'rstripped' non-comment line."
     while True:
         line = f.readline()
         if line == '':
@@ -182,12 +182,6 @@ def decode_auction(raw: str, dealer: str) -> list[str]:
         else:
             print('BAD auction:', raw)
             assert False
-    # Normalize auction, so North's bids are on the left.
-    # bids.append('?')
-    # if dealer != 'n':
-    #     count = BID_PADDING[dealer]
-    #     for i in range(count):
-    #         bids.insert(0, '-')
     return bids
 
 
@@ -199,18 +193,19 @@ def replace_xs(suit: str) -> str:
     if 'x' not in d:
         return suit
     n = d['x']
-    cards = cards[0:n]
-    cards.sort()
+    cards = cards[0:n]  # get one card for each 'x in the string
+    cards.sort()  # sort them ascending
     new = ''
     for c in suit:
         if c != 'x':
             new += c.upper()
         else:
-            new += cards.pop()
+            new += cards.pop()  # replace 'x' with largest remaining card
     return new
 
 
 def read_paragraph(f: TextIO) -> list[str]:
+    "Return lines from the file down to the first blank line."
     para: list[str] = []
     while True:
         line = get_line(f)

@@ -4,7 +4,7 @@
 quiz.py: Display bidding exercises and check answers
 
 Usage:
-    quiz.py [-k <key>] EXERCISES...
+    quiz.py [-k <key>] [-s] EXERCISES...
     quiz.py   --version
     quiz.py   --help
 
@@ -12,12 +12,14 @@ Options and commands:
     --version          Show version and exit.
     -h --help          Show this message and exit.
     -k <key>           Show only exercises with this keyword.
+    -s                 Sequential. Don't shuffle exercises before showing.
 """
 
 
 import curses
 import logging
-import sys
+import random
+# import sys
 import docopt  # type: ignore
 from exercise import Exercise
 
@@ -81,27 +83,20 @@ def main(scr) -> None:
     if win.rows < 40 or win.cols < 80:
         logging.fatal('Screen must be at least 40x80.')
         raise MyError('Screen must be at least 40x80')
-    # keyword = ''
+    keyword = ''
     args = docopt.docopt(__doc__, version='0.01')
     logging.debug(args)
-    # if args['-k']:
-    #     keyword = args['-k']
+    if args['-k']:
+        keyword = args['-k']
     g.exercises = read_exercises(args['EXERCISES'])
+    if not args['-s']:
+        random.shuffle(g.exercises)
     for ex in g.exercises:
+        if keyword != '' and keyword not in ex.keys:
+            continue
         want_more = show_exercise(ex, win)
         if not want_more:
             break
-    # with open(fname) as f:
-    #     while True:
-    #         ex = Exercise(f)
-    #         if not ex.valid:
-    #             break
-    #         if keyword != '':
-    #             if keyword not in ex.keys:
-    #                 continue
-    #         want_more = show_exercise(ex, win)
-    #         if not want_more:
-    #             break
 
 
 def read_exercises(files: list[str]) -> list[Exercise]:

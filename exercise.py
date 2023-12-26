@@ -113,7 +113,6 @@ class Exercise:
                 self.store_answers(f)
                 break
             else:
-                print('Invalid line:', line)
                 logging.debug('Invalid line: ' + line)
                 sys.exit(1)
 

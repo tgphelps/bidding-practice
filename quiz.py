@@ -101,6 +101,11 @@ def main(scr) -> None:
         want_more = show_exercise(ex, win)
         if not want_more:
             break
+    curses.endwin()
+
+    pct = float(g.total_right / g.total_answers)
+    msg = f'Total: {g.total_answers}  Correct: {g.total_right}  Score: {100 * pct:2.0f}% '
+    print(msg)
 
 
 def read_exercises(files: list[str]) -> list[Exercise]:

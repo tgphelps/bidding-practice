@@ -23,6 +23,7 @@ import docopt  # type: ignore
 
 VERSION = '0.01'
 TEMPLATE = 'template.txt'
+DEBUG = False
 
 
 class Hand:
@@ -42,25 +43,27 @@ def main() -> None:
     template = read_template(TEMPLATE)
     with open(fname) as fh, open(outfile, 'wt') as fex:
         while True:
-            line = fh.readline()
-            if line == '':
-                # print('eof looking for hand')
-                return
-            if line.startswith('Hand'):
-                break
-        hand = read_hand(line, fh)
-        write_exercise(template, hand, fex)
+            while True:
+                line = fh.readline()
+                if line == '':
+                    debug('eof looking for hand')
+                    return
+                if line.startswith('Hand'):
+                    break
+            hand = read_hand(line, fh)
+            debug('got complete hand')
+            write_exercise(template, hand, fex)
 
 
 def read_hand(label: str, fh: TextIO) -> Hand:
-    # print('read hand')
+    debug('reading hand')
     suits: list[str] = []
     while True:
         line = fh.readline()
         if line == '':
             assert 'EOF while reading hand' == ''
         line = line.rstrip()
-        # print('hand:', line)
+        debug('hand: ' + line)
         if line == '':
             break
         suits.append(line)
@@ -70,15 +73,16 @@ def read_hand(label: str, fh: TextIO) -> Hand:
 def write_exercise(template: list[str], hand: Hand, fex: TextIO) -> None:
     # print('write exercise')
     for line in template:
-        if line.startswith('HAND GOES HERE'):
-            for suit in hand.suits:
-                print(suit, file=fex)
+        if line.startswith('Hand:'):
+            debug('hand goes here')
             if '#' in hand.label:
                 i = hand.label.index('#')
                 comment = hand.label[i:]
             else:
                 comment = '#'
-            print(comment, file=fex)
+            print(f'Hand: {comment}', file=fex)
+            for suit in hand.suits:
+                print(suit, file=fex)
         else:
             print(line, file=fex)
 
@@ -90,6 +94,11 @@ def read_template(fname: str) -> list[str]:
         for line in f.readlines():
             lines.append(line.rstrip())
     return lines
+
+
+def debug(msg: str) -> None:
+    if DEBUG:
+        print(msg)
 
 
 if __name__ == '__main__':

@@ -7,9 +7,7 @@ Vulnerable: none
 Info:
  info
 
-Hand:
-
-HAND GOES HERE
+Hand:  # Goes here
 
 Auction:
  N    E    S    W

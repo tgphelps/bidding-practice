@@ -44,7 +44,8 @@ ROW_HINT = 29
 ROW_DEBUG = 35
 ROW_AUCTION = 11
 
-BG_COLOR = curses.COLOR_BLUE
+BG_COLOR1 = curses.COLOR_RED
+BG_COLOR2 = curses.COLOR_BLUE
 FG_COLOR = curses.COLOR_WHITE
 
 
@@ -57,6 +58,7 @@ class Globals:
     exercises: list[Exercise]
     total_answers: int
     total_right: int
+    count: int
 
 
 g = Globals()
@@ -64,6 +66,7 @@ g.click_count = 0
 g.exercises = []
 g.total_answers = 0
 g.total_right = 0
+g.count = 0
 
 
 class Window:
@@ -126,7 +129,11 @@ def read_exercises(files: list[str]) -> list[Exercise]:
 
 def show_exercise(ex: Exercise, win: Window) -> bool:
     logging.debug('New exercise')
-    curses.init_pair(1, FG_COLOR, BG_COLOR)
+    if g.count % 2 == 0:
+        curses.init_pair(1, FG_COLOR, BG_COLOR1)
+    else:
+        curses.init_pair(1, FG_COLOR, BG_COLOR2)
+    g.count += 1
     win.scr.bkgd(' ', curses.color_pair(1) | curses.A_BOLD)
     win.scr.clear()
 

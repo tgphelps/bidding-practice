@@ -29,6 +29,7 @@ class Hand:
             line = line.rstrip()
             if line == '':
                 continue
+            line = line.upper()
             line = replace_xs(line)
             self.suits.append(line)
             if len(self.suits) == 4:
@@ -139,7 +140,7 @@ class Exercise:
                 break
             fld = line.split()
             for bid in fld:
-                self.auction.append(bid)
+                self.auction.append(bid.upper())
 
     def store_answers(self, f: TextIO) -> None:
         while True:

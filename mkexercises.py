@@ -23,7 +23,7 @@ import docopt  # type: ignore
 
 VERSION = '0.01'
 TEMPLATE = 'template.txt'
-DEBUG = False
+DEBUG = True
 
 
 class Hand:
@@ -57,6 +57,7 @@ def main() -> None:
 
 def read_hand(label: str, fh: TextIO) -> Hand:
     debug('reading hand')
+    _ = fh.readline()  # blank line after 'Hand:'
     suits: list[str] = []
     while True:
         line = fh.readline()
@@ -67,6 +68,7 @@ def read_hand(label: str, fh: TextIO) -> Hand:
         if line == '':
             break
         suits.append(line)
+    assert len(suits) == 4
     return Hand(label, suits)
 
 
